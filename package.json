@@ -1,0 +1,28 @@
+{
+  "name": "ProjectoFinal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JPWUnesc/ProjetoFinal"
+  },
+  "author": "Marlon Albino",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JPWUnesc/ProjetoFinal"
+  },
+  "homepage": "https://github.com/JPWUnesc/ProjetoFinal#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.15",
+    "yarn": "^1.22.4"
+  }
+}
