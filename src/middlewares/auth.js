@@ -3,7 +3,10 @@ const authConfig = require('../config/auth.json');
 const express = require('express');
 const app = express();
 const cors = require('cors');
-app.use(cors());
+
+app.use(cors({
+    origin: '*'
+}));
 
 
 module.exports = (req, res, next) => {
