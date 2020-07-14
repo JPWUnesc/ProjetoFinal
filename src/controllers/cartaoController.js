@@ -8,23 +8,24 @@ router.use(authMiddleware);
 router.get("/", async (req, res) => {
   try {
     var filter = { usuario: req.userId };
-    if (req.query.nome) {
-      filter.nome = { $regex: ".*" + req.query.nome + ".*" };
+    if (req.query.search) {
+      filter.nome = { $regex: ".*" + req.query.search + ".*" };
     }
     var limit = parseInt(req.query.limit);
     var offset = parseInt(req.query.offset);
     const cartoes = await Cartao.find(filter)
       .limit(limit)
-      .skip(offset);
+      .skip(offset)
+      .sort(req.query.order);
 
     return res.send({
       success: true,
       total: await Cartao.countDocuments(filter),
       message: "Cartões listados com sucesso!",
-      actualPage: limit
+      actualPage: limit > 0 && offset > 0
         ? limit /
           (offset == 0 ? limit : offset)
-        : 1,
+        : 0,
       content: cartoes,
     });
   } catch (err) {
