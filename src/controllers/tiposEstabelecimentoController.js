@@ -6,18 +6,26 @@ const TipoEstabelecimento = require('../models/TipoEstabelecimento');
 router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
-    try{     
-        var filter = {usuario: req.userId};
-        if(req.query.nome){
-            filter.nome = {$regex: '.*' + req.query.nome + '.*' };
-        }   
+    try{ 
+        var filter = { usuario: req.userId };
+        if (req.query.search) {
+        filter.nome = { $regex: ".*" + req.query.search + ".*" };
+        }
+        var limit = parseInt(req.query.limit);
+        var offset = parseInt(req.query.offset);
         const tiposEstabelecimento = await TipoEstabelecimento.find(filter)
-                                        .limit(req.query.limit);
+                                    .limit(limit)
+                                    .skip(offset)
+                                    .sort(req.query.order);
 
         return res.send({
                     success: true, 
                     total: await TipoEstabelecimento.countDocuments(filter),
                     message: 'Tipos de estabelecimento listados com sucesso!', 
+                    actualPage: limit > 0 && offset > 0
+                      ? limit /
+                        (offset == 0 ? limit : offset)
+                      : 0,
                     content: tiposEstabelecimento
                 });
 

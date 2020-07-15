@@ -19,5 +19,6 @@ require('./controllers/tiposEstabelecimentoController')(app);
 require('./controllers/estabelecimentoController')(app);
 require('./controllers/objetivoController')(app);
 require('./controllers/cartaoController')(app);
+require('./controllers/movimentacaoController')(app);
 
 app.listen(3000);

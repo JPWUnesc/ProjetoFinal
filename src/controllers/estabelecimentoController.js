@@ -7,24 +7,32 @@ router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
     try{     
-        var filter = {usuario: req.userId};
-        if(req.query.nome){
-            filter.nome = {$regex: '.*' + req.query.nome + '.*' };
-        }   
+        var filter = { usuario: req.userId };
+        if (req.query.search) {
+        filter.nome = { $regex: ".*" + req.query.search + ".*" };
+        }
+        var limit = parseInt(req.query.limit);
+        var offset = parseInt(req.query.offset);
+
         const estabelecimento = await Estabelecimento.find(filter)
-                                        .populate(["tipoEstabelecimento"])
-                                        .limit(req.query.limit);
+                                    .limit(limit)
+                                    .skip(offset)
+                                    .sort(req.query.order);
 
         return res.send({
                     success: true, 
                     total: await Estabelecimento.countDocuments(filter),
                     message: 'Estabelecimentos listados com sucesso!', 
+                    actualPage: limit > 0 && offset > 0
+                      ? limit /
+                        (offset == 0 ? limit : offset)
+                      : 0, 
                     content: estabelecimento
                 });
 
     }catch(err){
         console.log(err);
-        return res.status(400).send({success: false, message: 'Não foi possivel listas os tipos de estabelecimento.'})
+        return res.status(400).send({success: false, message: 'Não foi possivel listas os estabelecimento.'})
     }
 });
 
@@ -42,7 +50,7 @@ router.get('/:estabelecimentoId', async (req, res) => {
 
     }catch(err){
         console.log(err);
-        return res.status(400).send({success: false, message: 'Não foi possivel encontrar o tipo de estabelecimento.'})
+        return res.status(400).send({success: false, message: 'Não foi possivel encontrar o estabelecimento.'})
     }
 });
 
@@ -51,8 +59,17 @@ router.post('/', async (req, res) => {
         const { nome } = req.body;
 
         if(await Estabelecimento.findOne({ nome, usuario: req.userId })){
-            return res.status(400).send({ success:false, message: 'Este tipo de equipamento já existe!'});
+            return res.status(400).send({ success:false, message: 'Este estabelecimento já existe!'});
         }
+
+        console.log(req.body);
+        if(req.body.tipoEstabelecimento && typeof req.body.tipoEstabelecimento !== 'object'){
+            
+            console.log('Aquiii');
+            req.body.tipoEstabelecimento = { "_id": req.body.tipoEstabelecimento};
+            console.log(req.body);
+        }
+
         const estabelecimento = await Estabelecimento.create({ ...req.body, usuario: req.userId });
 
         return res.send({
@@ -63,7 +80,7 @@ router.post('/', async (req, res) => {
 
     }catch(err){
         console.log(err);
-        return res.status(400).send({success: false, message: 'Não foi possivel salvar o tipo de estabelecimento.'})
+        return res.status(400).send({success: false, message: 'Não foi possivel salvar o estabelecimento.'})
     }
 });
 
@@ -72,7 +89,15 @@ router.put('/:estabelecimentoId', async (req, res) => {
         const { nome } = req.body;
 
         if(await Estabelecimento.findOne({ nome, _id:{$ne: req.params.estabelecimentoId} })){
-            return res.status(400).send({ success:false, message: 'Este nome de tipo de estabelecimento já existe!'});
+            return res.status(400).send({ success:false, message: 'Este nome do estabelecimento já existe!'});
+        }
+
+        console.log(req.body);
+        if(req.body.tipoEstabelecimento && typeof req.body.tipoEstabelecimento !== 'object'){
+            
+            console.log('Aquiii');
+            req.body.tipoEstabelecimento = { "_id": req.body.tipoEstabelecimento};
+            console.log(req.body);
         }
 
         const estabelecimento = await Estabelecimento.findByIdAndUpdate(req.params.estabelecimentoId, req.body, {new: true});
@@ -85,7 +110,7 @@ router.put('/:estabelecimentoId', async (req, res) => {
 
     }catch(err){
         console.log(err);
-        return res.status(400).send({success: false, message: 'Não foi possivel salvar o tipo de estabelecimento.'})
+        return res.status(400).send({success: false, message: 'Não foi possivel salvar o estabelecimento.'})
     }
 });
 
