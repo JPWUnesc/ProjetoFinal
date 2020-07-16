@@ -26,6 +26,10 @@ const MovimentacaoSchema = new mongoose.Schema({
         enum : ['ACRESCIMO', 'DECRESCIMO'],
         require: true
     },
+    data: {
+        type : Date, 
+        default: Date.now 
+    },
     valor:{
         type: Number,
         require: true

@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/auth');
 const Movimentacao = require('../models/Movimentacao');
+const mongoose = require('../database');
+const service = require('../services/movimentacaoServices');
 
 router.use(authMiddleware);
 
@@ -35,6 +37,78 @@ router.get('/', async (req, res) => {
         return res.status(400).send({success: false, message: 'Não foi possivel listas as movimentações.'})
     }
 });
+
+router.get('/graph', async (req, res) => {
+    try{
+
+        const movimentacao = await Movimentacao.aggregate(service.graphExpression(req, req.query.by == 'day'));
+
+        return res.send({
+                    success: true, 
+                    message: 'Movimentacões listadas com sucesso!', 
+                    content: movimentacao
+                });
+
+    }catch(err){
+        console.log(err);
+        return res.status(400).send({success: false, message: 'Não foi possivel listas as movimentações.'})
+    }
+});
+
+router.get('/carteira', async (req, res) => {
+    try{
+
+        const movimentacao = await Movimentacao.aggregate([ 
+        {$match: {  
+                usuario : new mongoose.Types.ObjectId(req.userId)
+        }
+    },
+    { 
+        $group: {
+        _id: {usuario: '$usuario'},
+        acresimo:   { 
+            $sum: { 
+                $switch: { 
+                    branches: [ 
+                        { 
+                            "case": { "$eq": [ "$tipo", 'ACRESCIMO' ] }, 
+                            "then": "$valor"
+                        }
+                    ], 
+                    "default": 0 
+                }
+            }
+        },
+        decrescimo: { 
+                    $sum: { 
+                        $switch: { 
+                            branches: [ 
+                                { 
+                                    "case": { "$eq": [ "$tipo", 'DECRESCIMO' ] }, 
+                                    "then": "$valor"
+                                }
+                            ], 
+                            "default": 0 
+                        }
+                    }
+                }
+            }
+        }
+    ]);
+
+        return res.send({
+                    success: true, 
+                    message: 'Movimentacões listadas com sucesso!', 
+                    content: movimentacao[0]
+                });
+
+    }catch(err){
+        console.log(err);
+        return res.status(400).send({success: false, message: 'Não foi possivel listas as movimentações.'})
+    }
+});
+
+
 
 router.get('/:id', async (req, res) => {
     try{
