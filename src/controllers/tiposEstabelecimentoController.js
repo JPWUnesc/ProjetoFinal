@@ -23,8 +23,7 @@ router.get('/', async (req, res) => {
                     total: await TipoEstabelecimento.countDocuments(filter),
                     message: 'Tipos de estabelecimento listados com sucesso!', 
                     actualPage: limit > 0 && offset > 0
-                      ? limit /
-                        (offset == 0 ? limit : offset)
+                      ? offset / limit
                       : 0,
                     content: tiposEstabelecimento
                 });
@@ -55,9 +54,6 @@ router.post('/', async (req, res) => {
     try{
         const { nome } = req.body;
 
-        if(await TipoEstabelecimento.findOne({ nome, usuario: req.userId })){
-            return res.status(400).send({ success:false, message: 'Este tipo de equipamento já existe!'});
-        }
         const tipoEstabelecimento = await TipoEstabelecimento.create({ ...req.body, usuario: req.userId });
 
         return res.send({
@@ -75,10 +71,6 @@ router.post('/', async (req, res) => {
 router.put('/:tipoEstabelecimentoId', async (req, res) => {
     try{
         const { nome } = req.body;
-
-        if(await TipoEstabelecimento.findOne({ nome, _id:{$ne: req.params.tipoEstabelecimentoId} })){
-            return res.status(400).send({ success:false, message: 'Este nome de tipo de estabelecimento já existe!'});
-        }
 
         const tipoEstabelecimento = await TipoEstabelecimento.findByIdAndUpdate(req.params.tipoEstabelecimentoId, req.body, {new: true});
 

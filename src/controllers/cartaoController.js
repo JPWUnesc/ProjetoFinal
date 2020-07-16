@@ -23,8 +23,7 @@ router.get("/", async (req, res) => {
       total: await Cartao.countDocuments(filter),
       message: "Cartões listados com sucesso!",
       actualPage: limit > 0 && offset > 0
-        ? limit /
-          (offset == 0 ? limit : offset)
+        ? offset / limit
         : 0,
       content: cartoes,
     });
@@ -99,12 +98,6 @@ router.post("/", async (req, res) => {
 router.put("/:cartaoId", async (req, res) => {
   try {
     const { nome } = req.body;
-
-    if (await Cartao.findOne({ nome, _id: { $ne: req.params.cartaoId }, usuario: req.userId })) {
-      return res
-        .status(400)
-        .send({ success: false, message: "Este nome de cartão já existe!" });
-    }
 
     if (
       req.body.modalidade !== undefined &&

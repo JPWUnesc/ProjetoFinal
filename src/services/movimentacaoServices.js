@@ -4,22 +4,29 @@ module.exports = {
     graphExpression: graphExpression,
   };
 
-const dateGreat= new Date();
 
 function graphExpression(req, day){
+    
+    const dateGreat= new Date();
+
     if(day){
         dateGreat.setDate(dateGreat.getDate()-30);
     }else{
         dateGreat.setDate(dateGreat.getDate()-365);
     }
 
+    console.log(dateGreat);
+
     var groupObject = { month: {$month: "$data"}, year: {$year: "$data"}}
+    var sortObject = { month: 1, year: 1}
 
     if(day){
         groupObject = { day: {$dayOfMonth: "$data"}, month: {$month: "$data"}, year: {$year: "$data"}}
+        sortObject = { day:1, month: 1, year: 1}
     }
 
-    return [{
+    return [
+        {
         $match: {  
             $and : [
                 {usuario : new mongoose.Types.ObjectId(req.userId)},
@@ -60,7 +67,7 @@ function graphExpression(req, day){
             }
         },
         {
-            $sort: { data : 1 }
+            $sort: sortObject
         }                                       
     ];
 }

@@ -24,8 +24,7 @@ router.get('/', async (req, res) => {
                     total: await Estabelecimento.countDocuments(filter),
                     message: 'Estabelecimentos listados com sucesso!', 
                     actualPage: limit > 0 && offset > 0
-                      ? limit /
-                        (offset == 0 ? limit : offset)
+                      ? offset / limit
                       : 0, 
                     content: estabelecimento
                 });
@@ -58,11 +57,6 @@ router.post('/', async (req, res) => {
     try{
         const { nome } = req.body;
 
-        if(await Estabelecimento.findOne({ nome, usuario: req.userId })){
-            return res.status(400).send({ success:false, message: 'Este estabelecimento já existe!'});
-        }
-
-        console.log(req.body);
         if(req.body.tipoEstabelecimento && typeof req.body.tipoEstabelecimento !== 'object'){
             
             console.log('Aquiii');
@@ -88,11 +82,6 @@ router.put('/:estabelecimentoId', async (req, res) => {
     try{
         const { nome } = req.body;
 
-        if(await Estabelecimento.findOne({ nome, _id:{$ne: req.params.estabelecimentoId} })){
-            return res.status(400).send({ success:false, message: 'Este nome do estabelecimento já existe!'});
-        }
-
-        console.log(req.body);
         if(req.body.tipoEstabelecimento && typeof req.body.tipoEstabelecimento !== 'object'){
             
             console.log('Aquiii');

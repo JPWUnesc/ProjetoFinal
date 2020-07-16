@@ -26,8 +26,7 @@ router.get('/', async (req, res) => {
                     total: await Movimentacao.countDocuments(filter),
                     message: 'Movimentacões listadas com sucesso!', 
                     actualPage: limit > 0 && offset > 0
-                      ? limit /
-                        (offset == 0 ? limit : offset)
+                      ? offset / limit
                       : 0, 
                     content: movimentacao
                 });
@@ -131,10 +130,6 @@ router.post('/', async (req, res) => {
     try{
         const { nome } = req.body;
 
-        if(await Movimentacao.findOne({ nome, usuario: req.userId })){
-            return res.status(400).send({ success:false, message: 'Esta movimentacão já existe!'});
-        }
-
         if(req.body.estabelecimento && typeof req.body.estabelecimento !== 'object'){
             req.body.estabelecimento = { "_id": req.body.estabelecimento};
             console.log(req.body);
@@ -162,10 +157,6 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try{
         const { nome } = req.body;
-
-        if(await Movimentacao.findOne({ nome, _id:{$ne: req.params.id} })){
-            return res.status(400).send({ success:false, message: 'Este nome de movimentação já existe!'});
-        }
 
         if(req.body.estabelecimento && typeof req.body.estabelecimento !== 'object'){
             req.body.estabelecimento = { "_id": req.body.estabelecimento};

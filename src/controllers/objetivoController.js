@@ -23,7 +23,9 @@ router.get("/", async (req, res) => {
       total: total,
       message: "Objetivos listados com sucesso!",
       actualPage:
-        limit > 0 && offset > 0 ? limit / (offset == 0 ? limit : offset) : 0,
+      limit > 0 && offset > 0
+      ? offset / limit
+      : 0,
       content: objetivos,
     });
   } catch (err) {
@@ -64,11 +66,6 @@ router.post("/", async (req, res) => {
   try {
     const { nome } = req.body;
 
-    if (await Objetivo.findOne({ nome, usuario: req.userId })) {
-      return res
-        .status(400)
-        .send({ success: false, message: "Este objetivo já existe!" });
-    }
     const objetivo = await Objetivo.create({
       ...req.body,
       usuario: req.userId,
@@ -91,7 +88,7 @@ router.put("/:objetivoId", async (req, res) => {
   try {
     const { nome } = req.body;
 
-    if (await Objetivo.findOne({ nome, _id: { $ne: req.params.objetivoId } })) {
+    if (await Objetivo.findOne({ nome, _id: { $ne: req.params.objetivoId }, usuario: req.userId })) {
       return res
         .status(400)
         .send({ success: false, message: "Este nome de objetivo já existe!" });
